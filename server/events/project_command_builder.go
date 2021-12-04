@@ -207,7 +207,7 @@ func (p *DefaultProjectCommandBuilder) buildPlanAllCommands(ctx *CommandContext,
 	// Need to lock the workspace we're about to clone to.
 	workspace := DefaultWorkspace
 
-	unlockFn, err := p.WorkingDirLocker.TryLock(ctx.Pull.BaseRepo.FullName, ctx.Pull.Num, workspace)
+	unlockFn, err := p.WorkingDirLocker.TryLockPull(ctx.Pull.BaseRepo.FullName, ctx.Pull.Num)
 	if err != nil {
 		ctx.Log.Warn("workspace was locked")
 		return nil, err
@@ -300,9 +300,14 @@ func (p *DefaultProjectCommandBuilder) buildProjectPlanCommand(ctx *CommandConte
 		workspace = cmd.Workspace
 	}
 
+	repoRelDir := DefaultRepoRelDir
+	if cmd.RepoRelDir != "" {
+		repoRelDir = cmd.RepoRelDir
+	}
+
 	var pcc []models.ProjectCommandContext
 	ctx.Log.Debug("building plan command")
-	unlockFn, err := p.WorkingDirLocker.TryLock(ctx.Pull.BaseRepo.FullName, ctx.Pull.Num, workspace)
+	unlockFn, err := p.WorkingDirLocker.TryLock(ctx.Pull.BaseRepo.FullName, ctx.Pull.Num, repoRelDir, workspace)
 	if err != nil {
 		return pcc, err
 	}
@@ -312,11 +317,6 @@ func (p *DefaultProjectCommandBuilder) buildProjectPlanCommand(ctx *CommandConte
 	_, _, err = p.WorkingDir.Clone(ctx.Log, ctx.HeadRepo, ctx.Pull, workspace)
 	if err != nil {
 		return pcc, err
-	}
-
-	repoRelDir := DefaultRepoRelDir
-	if cmd.RepoRelDir != "" {
-		repoRelDir = cmd.RepoRelDir
 	}
 
 	// use the default repository workspace because it is the only one guaranteed to have an atlantis.yaml,
@@ -437,8 +437,13 @@ func (p *DefaultProjectCommandBuilder) buildProjectApplyCommand(ctx *CommandCont
 		workspace = cmd.Workspace
 	}
 
+	repoRelDir := DefaultRepoRelDir
+	if cmd.RepoRelDir != "" {
+		repoRelDir = cmd.RepoRelDir
+	}
+
 	var projCtx []models.ProjectCommandContext
-	unlockFn, err := p.WorkingDirLocker.TryLock(ctx.Pull.BaseRepo.FullName, ctx.Pull.Num, workspace)
+	unlockFn, err := p.WorkingDirLocker.TryLock(ctx.Pull.BaseRepo.FullName, ctx.Pull.Num, repoRelDir, workspace)
 	if err != nil {
 		return projCtx, err
 	}
@@ -451,11 +456,6 @@ func (p *DefaultProjectCommandBuilder) buildProjectApplyCommand(ctx *CommandCont
 		return projCtx, errors.New("no working directory found–did you run plan?")
 	} else if err != nil {
 		return projCtx, err
-	}
-
-	repoRelDir := DefaultRepoRelDir
-	if cmd.RepoRelDir != "" {
-		repoRelDir = cmd.RepoRelDir
 	}
 
 	return p.buildProjectCommandCtx(
@@ -478,8 +478,13 @@ func (p *DefaultProjectCommandBuilder) buildProjectVersionCommand(ctx *CommandCo
 		workspace = cmd.Workspace
 	}
 
+	repoRelDir := DefaultRepoRelDir
+	if cmd.RepoRelDir != "" {
+		repoRelDir = cmd.RepoRelDir
+	}
+
 	var projCtx []models.ProjectCommandContext
-	unlockFn, err := p.WorkingDirLocker.TryLock(ctx.Pull.BaseRepo.FullName, ctx.Pull.Num, workspace)
+	unlockFn, err := p.WorkingDirLocker.TryLock(ctx.Pull.BaseRepo.FullName, ctx.Pull.Num, repoRelDir, workspace)
 	if err != nil {
 		return projCtx, err
 	}
@@ -492,11 +497,6 @@ func (p *DefaultProjectCommandBuilder) buildProjectVersionCommand(ctx *CommandCo
 		return projCtx, errors.New("no working directory found–did you run plan?")
 	} else if err != nil {
 		return projCtx, err
-	}
-
-	repoRelDir := DefaultRepoRelDir
-	if cmd.RepoRelDir != "" {
-		repoRelDir = cmd.RepoRelDir
 	}
 
 	return p.buildProjectCommandCtx(
