@@ -92,7 +92,7 @@ func TestRunPreHooks_Clone(t *testing.T) {
 
 		wh.GlobalCfg = globalCfg
 
-		When(whWorkingDirLocker.TryLock(fixtures.GithubRepo.FullName, newPull.Num, events.DefaultWorkspace)).ThenReturn(unlockFn, nil)
+		When(whWorkingDirLocker.TryLockPull(fixtures.GithubRepo.FullName, newPull.Num)).ThenReturn(unlockFn, nil)
 		When(whWorkingDir.Clone(log, fixtures.GithubRepo, newPull, events.DefaultWorkspace)).ThenReturn(repoDir, false, nil)
 		When(whPreWorkflowHookRunner.Run(pCtx, testHook.RunCommand, repoDir)).ThenReturn(result, nil)
 
@@ -128,7 +128,7 @@ func TestRunPreHooks_Clone(t *testing.T) {
 		Ok(t, err)
 
 		whPreWorkflowHookRunner.VerifyWasCalled(Never()).Run(pCtx, testHook.RunCommand, repoDir)
-		whWorkingDirLocker.VerifyWasCalled(Never()).TryLock(fixtures.GithubRepo.FullName, newPull.Num, events.DefaultWorkspace)
+		whWorkingDirLocker.VerifyWasCalled(Never()).TryLockPull(fixtures.GithubRepo.FullName, newPull.Num)
 		whWorkingDir.VerifyWasCalled(Never()).Clone(log, fixtures.GithubRepo, newPull, events.DefaultWorkspace)
 	})
 	t.Run("error locking work dir", func(t *testing.T) {
@@ -147,7 +147,7 @@ func TestRunPreHooks_Clone(t *testing.T) {
 
 		wh.GlobalCfg = globalCfg
 
-		When(whWorkingDirLocker.TryLock(fixtures.GithubRepo.FullName, newPull.Num, events.DefaultWorkspace)).ThenReturn(func() {}, errors.New("some error"))
+		When(whWorkingDirLocker.TryLockPull(fixtures.GithubRepo.FullName, newPull.Num)).ThenReturn(func() {}, errors.New("some error"))
 
 		err := wh.RunPreHooks(ctx)
 
@@ -177,7 +177,7 @@ func TestRunPreHooks_Clone(t *testing.T) {
 
 		wh.GlobalCfg = globalCfg
 
-		When(whWorkingDirLocker.TryLock(fixtures.GithubRepo.FullName, newPull.Num, events.DefaultWorkspace)).ThenReturn(unlockFn, nil)
+		When(whWorkingDirLocker.TryLockPull(fixtures.GithubRepo.FullName, newPull.Num)).ThenReturn(unlockFn, nil)
 		When(whWorkingDir.Clone(log, fixtures.GithubRepo, newPull, events.DefaultWorkspace)).ThenReturn(repoDir, false, errors.New("some error"))
 
 		err := wh.RunPreHooks(ctx)
@@ -209,7 +209,7 @@ func TestRunPreHooks_Clone(t *testing.T) {
 
 		wh.GlobalCfg = globalCfg
 
-		When(whWorkingDirLocker.TryLock(fixtures.GithubRepo.FullName, newPull.Num, events.DefaultWorkspace)).ThenReturn(unlockFn, nil)
+		When(whWorkingDirLocker.TryLockPull(fixtures.GithubRepo.FullName, newPull.Num)).ThenReturn(unlockFn, nil)
 		When(whWorkingDir.Clone(log, fixtures.GithubRepo, newPull, events.DefaultWorkspace)).ThenReturn(repoDir, false, nil)
 		When(whPreWorkflowHookRunner.Run(pCtx, testHook.RunCommand, repoDir)).ThenReturn(result, errors.New("some error"))
 
