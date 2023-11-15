@@ -154,9 +154,10 @@ func (w *FileWorkspace) warnDiverged(log logging.SimpleLogging, p models.PullReq
 		cmd.Dir = cloneDir
 
 		output, err := cmd.CombinedOutput()
+		sanitizedOutput := w.sanitizeGitCredentials(string(output), p.BaseRepo, headRepo)
 
 		if err != nil {
-			log.Warn("getting remote update failed: %s", string(output))
+			log.Warn("getting remote update failed: %s", sanitizedOutput)
 			return false
 		}
 	}
